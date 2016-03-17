@@ -62,18 +62,32 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <tableView clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="rXy-Td-rpK">
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="rXy-Td-rpK">
                                 <rect key="frame" x="180" y="236" width="240" height="128"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="240" id="fTN-cH-Aoc"/>
+                                    <constraint firstAttribute="height" constant="128" id="xF1-1G-K3S"/>
+                                </constraints>
                             </tableView>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Scheduled events go here" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="t0v-WU-9NG">
-                                <rect key="frame" x="114" y="144" width="384" height="70"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Scheduled events go here" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="t0v-WU-9NG">
+                                <rect key="frame" x="108" y="140" width="384" height="70"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="70" id="QEh-28-xHh"/>
+                                    <constraint firstAttribute="width" constant="384" id="d3j-aX-43p"/>
+                                </constraints>
                                 <fontDescription key="fontDescription" type="system" pointSize="31"/>
-                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="t0v-WU-9NG" firstAttribute="top" secondItem="HNo-PV-ahR" secondAttribute="bottom" constant="120" id="8Eh-4N-phs"/>
+                            <constraint firstItem="rXy-Td-rpK" firstAttribute="top" secondItem="HNo-PV-ahR" secondAttribute="bottom" constant="216" id="Fy8-dq-VIB"/>
+                            <constraint firstItem="t0v-WU-9NG" firstAttribute="centerX" secondItem="V6q-kB-1e1" secondAttribute="centerX" id="G2p-y7-Xvc"/>
+                            <constraint firstItem="rXy-Td-rpK" firstAttribute="centerX" secondItem="V6q-kB-1e1" secondAttribute="centerX" id="Ksw-oA-XfE"/>
+                        </constraints>
                     </view>
                     <tabBarItem key="tabBarItem" title="Item 2" id="Yat-by-bcq"/>
                 </viewController>
@@ -93,14 +107,22 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Map goes here" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="KEX-fF-egh">
-                                <rect key="frame" x="204" y="181" width="192" height="122"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Map goes here" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="KEX-fF-egh">
+                                <rect key="frame" x="204" y="239" width="192" height="122"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="192" id="Ij2-82-hAd"/>
+                                    <constraint firstAttribute="height" constant="122" id="gvG-wW-v1J"/>
+                                </constraints>
                                 <fontDescription key="fontDescription" type="system" pointSize="27"/>
-                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="KEX-fF-egh" firstAttribute="centerX" secondItem="xJk-Jg-3fZ" secondAttribute="centerX" id="NEn-GW-Cey"/>
+                            <constraint firstItem="KEX-fF-egh" firstAttribute="centerY" secondItem="xJk-Jg-3fZ" secondAttribute="centerY" id="X2M-nY-eeF"/>
+                        </constraints>
                     </view>
                     <tabBarItem key="tabBarItem" title="Item 3" id="hHk-td-4f5"/>
                     <simulatedTabBarMetrics key="simulatedBottomBarMetrics"/>
@@ -121,14 +143,18 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Settings go here" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="bHJ-3Q-TSc">
-                                <rect key="frame" x="153" y="220" width="231" height="56"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Settings go here" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="bHJ-3Q-TSc">
+                                <rect key="frame" x="191" y="282" width="218" height="36"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="30"/>
-                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="bHJ-3Q-TSc" firstAttribute="centerY" secondItem="ZRw-6E-jli" secondAttribute="centerY" id="VOU-KC-37l"/>
+                            <constraint firstItem="bHJ-3Q-TSc" firstAttribute="centerX" secondItem="ZRw-6E-jli" secondAttribute="centerX" id="mF9-rR-P6I"/>
+                        </constraints>
                     </view>
                     <tabBarItem key="tabBarItem" title="Item 1" id="gLE-pc-BC4"/>
                 </viewController>
@@ -139,7 +165,7 @@
         <!--Tab Bar Controller-->
         <scene sceneID="PC2-6w-OVY">
             <objects>
-                <tabBarController id="g4U-g8-6Gr" sceneMemberID="viewController">
+                <tabBarController storyboardIdentifier="LoggedInViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="g4U-g8-6Gr" sceneMemberID="viewController">
                     <tabBar key="tabBar" contentMode="scaleToFill" id="fhr-zZ-7eF">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="49"/>
                         <autoresizingMask key="autoresizingMask"/>

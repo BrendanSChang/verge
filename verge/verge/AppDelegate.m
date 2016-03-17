@@ -79,6 +79,8 @@ didSignInForUser:(GIDGoogleUser *)user
     NSString *email = user.profile.email;
     // ...
     */
+
+    [self.window.rootViewController performSegueWithIdentifier:@"loginSegue" sender:self];
 }
 
 - (void)signIn:(GIDSignIn *)signIn
