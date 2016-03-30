@@ -12,7 +12,9 @@
 
 @end
 
-@implementation AppDelegate
+@implementation AppDelegate {
+    CLLocation *destination;
+}
 
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
@@ -67,7 +69,7 @@
                                       annotation:annotation];
 }
 
-#pragma mark -- Google Sign In Delegate Methods
+# pragma mark -- Google Sign In Delegate Methods
 
 - (void)signIn:(GIDSignIn *)signIn
 didSignInForUser:(GIDGoogleUser *)user
@@ -88,6 +90,22 @@ didDisconnectWithUser:(GIDGoogleUser *)user
      withError:(NSError *)error {
     // Perform any operations when the user disconnects from app here.
     // ...
+}
+
+# pragma mark -- Utility Methods
+
+- (void)setDestination:(CLPlacemark *)placemark {
+    destination = placemark.location;
+}
+
+- (void)geocode:(NSString *)address {
+    CLGeocoder *geocoder = [[CLGeocoder alloc] init];
+    [geocoder geocodeAddressString:address completionHandler:^(NSArray *placemarks, NSError *error) {
+        if (!error) {
+            CLPlacemark *placemark = [placemarks firstObject];
+            [self setDestination:placemark];
+        }
+    }];
 }
 
 @end

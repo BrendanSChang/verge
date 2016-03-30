@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import <Google/SignIn.h>
+#import <CoreLocation/CoreLocation.h>
 
 @interface AppDelegate : UIResponder <UIApplicationDelegate, GIDSignInDelegate>
 
