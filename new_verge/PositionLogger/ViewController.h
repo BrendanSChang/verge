@@ -30,6 +30,7 @@ typedef enum {
 @property (weak, nonatomic) IBOutlet UILabel *speedLabel;
 @property (weak, nonatomic) IBOutlet UILabel *distanceToLabel;
 @property (weak, nonatomic) IBOutlet UILabel *targetAddressLabel;
+@property (weak, nonatomic) IBOutlet UILabel *timeLabel;
 
 @end
 

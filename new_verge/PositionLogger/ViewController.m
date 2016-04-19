@@ -27,6 +27,7 @@
 
   double prevSpeed;
   double eta;
+  double thresholdDistance;
 }
 
 - (void)viewDidLoad {
@@ -34,6 +35,7 @@
 
   startLoc = NULL;
   prevLoc = NULL;
+  thresholdDistance = 30; //distance (in meters) where we say you've arrived
 
   prevSpeed = 0;
   eta = INFINITY;
@@ -123,7 +125,6 @@
   [_locmgr startUpdatingLocation];
 }
 
-//TODO: Implement me
 -(void)stopRecordingLocationWithAccuracy {
   [_locmgr stopUpdatingLocation];
 }
@@ -211,6 +212,14 @@
     if (startLoc == NULL){
       startLoc = location;
     }
+    
+    if ([self arrivedAtDestination:location]) {
+      [self stopRecordingLocationWithAccuracy];
+      _distanceToLabel.text = @"You've arrived!";
+      //TODO: stop recording location
+      //update UI
+    }
+    
 
     NSLog(@"Updating location");
     _distanceToLabel.text = [NSString stringWithFormat: @"%f",
@@ -261,6 +270,10 @@
 
 
 # pragma mark - Helper Functions -
+
+-(bool) arrivedAtDestination:(CLLocation *)currentLocation{
+  return [self distanceBetween:prevLoc and:currentLocation] < thresholdDistance;
+}
 
 -(double)distanceBetween:(CLLocation *)loc1 and:(CLLocation *)loc2 {
   double lat1 = loc1.coordinate.latitude;

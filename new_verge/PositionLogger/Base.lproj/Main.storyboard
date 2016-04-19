@@ -18,8 +18,8 @@
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Click to toggle recording" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Uc5-QJ-BRF">
-                                <rect key="frame" x="0.0" y="190" width="320" height="21"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Click to toggle recording" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Uc5-QJ-BRF">
+                                <rect key="frame" x="0.0" y="212" width="320" height="21"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="21" id="bgE-cX-gCy"/>
                                 </constraints>
@@ -27,8 +27,8 @@
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Choose a location" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="jNZ-UQ-NGD">
-                                <rect key="frame" x="0.0" y="71" width="320" height="21"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Choose a location" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="jNZ-UQ-NGD">
+                                <rect key="frame" x="0.0" y="39" width="320" height="21"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="21" id="Mci-zZ-Q1U"/>
                                 </constraints>
@@ -36,21 +36,6 @@
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="osL-hL-eIy">
-                                <rect key="frame" x="56" y="108" width="209" height="29"/>
-                                <segments>
-                                    <segment title="Loc 1"/>
-                                    <segment title="Loc 2"/>
-                                    <segment title="Loc 3"/>
-                                </segments>
-                            </segmentedControl>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="xbk-aA-aGR">
-                                <rect key="frame" x="98" y="229" width="124" height="30"/>
-                                <state key="normal" title="Start"/>
-                                <connections>
-                                    <action selector="hitRecordStopButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="wxu-7f-5gC"/>
-                                </connections>
-                            </button>
                             <button opaque="NO" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="gUb-jQ-7wN">
                                 <rect key="frame" x="52" y="434" width="216" height="30"/>
                                 <state key="normal" title="Email Log File"/>
@@ -91,7 +76,7 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" text="ETA" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="31K-Qj-REL">
-                                <rect key="frame" x="145" y="317" width="30" height="21"/>
+                                <rect key="frame" x="145" y="288" width="30" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
@@ -102,12 +87,33 @@
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" text="Address" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="IKq-Kh-KfR">
-                                <rect key="frame" x="129" y="288" width="63" height="21"/>
+                            <segmentedControl opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="osL-hL-eIy">
+                                <rect key="frame" x="56" y="68" width="209" height="29"/>
+                                <segments>
+                                    <segment title="Loc 1"/>
+                                    <segment title="Loc 2"/>
+                                    <segment title="Loc 3"/>
+                                </segments>
+                            </segmentedControl>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Destination" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Ho0-pD-cXY">
+                                <rect key="frame" x="117" y="124" width="87" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" text="Time" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5hk-VB-YR2">
+                                <rect key="frame" x="143" y="317" width="38" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="xbk-aA-aGR">
+                                <rect key="frame" x="98" y="234" width="124" height="30"/>
+                                <state key="normal" title="Start"/>
+                                <connections>
+                                    <action selector="hitRecordStopButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="wxu-7f-5gC"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
@@ -116,16 +122,19 @@
                             <constraint firstItem="31K-Qj-REL" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="5I2-L1-BQn"/>
                             <constraint firstItem="3ZX-d9-vg4" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="60" id="6Lq-Sk-1Ha"/>
                             <constraint firstItem="xbk-aA-aGR" firstAttribute="centerY" secondItem="3ZX-d9-vg4" secondAttribute="centerY" id="6aT-c8-Huc"/>
+                            <constraint firstItem="osL-hL-eIy" firstAttribute="top" secondItem="AQN-T1-kYl" secondAttribute="bottom" constant="48" id="7a9-xI-o4g"/>
                             <constraint firstItem="xbk-aA-aGR" firstAttribute="leading" secondItem="3ZX-d9-vg4" secondAttribute="trailing" constant="2" id="A9B-re-IXy"/>
+                            <constraint firstItem="Ho0-pD-cXY" firstAttribute="top" secondItem="AQN-T1-kYl" secondAttribute="bottom" constant="104" id="Ayq-69-8C6"/>
                             <constraint firstItem="osL-hL-eIy" firstAttribute="centerX" secondItem="jNZ-UQ-NGD" secondAttribute="centerX" id="D8G-zj-63g"/>
                             <constraint firstItem="gUb-jQ-7wN" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="EXr-zj-GfH"/>
+                            <constraint firstItem="5hk-VB-YR2" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="Msf-ZP-DvH"/>
                             <constraint firstItem="Uc5-QJ-BRF" firstAttribute="top" secondItem="osL-hL-eIy" secondAttribute="bottom" constant="54" id="VDw-9v-Vrl"/>
                             <constraint firstItem="xbk-aA-aGR" firstAttribute="top" secondItem="Uc5-QJ-BRF" secondAttribute="bottom" constant="18" id="VYC-iW-gPS"/>
+                            <constraint firstItem="Ho0-pD-cXY" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="W7x-fd-Blz"/>
                             <constraint firstItem="Uc5-QJ-BRF" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="ZHw-L3-pXV"/>
                             <constraint firstItem="Uc5-QJ-BRF" firstAttribute="centerX" secondItem="xbk-aA-aGR" secondAttribute="centerX" id="Zk7-eC-wj9"/>
                             <constraint firstItem="xkU-4M-hiX" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="fjc-z1-Mlp"/>
                             <constraint firstItem="XdZ-3H-DvG" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="ga1-SC-GYw"/>
-                            <constraint firstItem="IKq-Kh-KfR" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="gmF-dT-HJ9"/>
                             <constraint firstItem="Uc5-QJ-BRF" firstAttribute="leading" secondItem="jNZ-UQ-NGD" secondAttribute="leading" id="jbW-VB-Iqm"/>
                             <constraint firstItem="Uc5-QJ-BRF" firstAttribute="trailing" secondItem="jNZ-UQ-NGD" secondAttribute="trailing" id="sWd-9G-xvF"/>
                             <constraint firstItem="osL-hL-eIy" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="40" id="tyk-2o-DUx"/>
@@ -140,7 +149,8 @@
                         <outlet property="recordingIndicator" destination="3ZX-d9-vg4" id="B6X-jG-uxl"/>
                         <outlet property="speedLabel" destination="xkU-4M-hiX" id="WXk-nB-gcC"/>
                         <outlet property="startStopButton" destination="xbk-aA-aGR" id="obg-bV-Fvx"/>
-                        <outlet property="targetAddressLabel" destination="IKq-Kh-KfR" id="EFX-Hs-NJW"/>
+                        <outlet property="targetAddressLabel" destination="Ho0-pD-cXY" id="GC8-PL-Hc3"/>
+                        <outlet property="timeLabel" destination="5hk-VB-YR2" id="BQe-1A-206"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
