@@ -110,7 +110,7 @@
 				TargetAttributes = {
 					DB278BAC1C6289680083FD72 = {
 						CreatedOnToolsVersion = 7.2;
-						DevelopmentTeam = X93K6M4D6X;
+						DevelopmentTeam = F86979MS54;
 					};
 				};
 			};
@@ -266,7 +266,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = PositionLogger/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = edu.mit.PositionLogger;
+				PRODUCT_BUNDLE_IDENTIFIER = edu.mit.PositionLogger123;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 			};
@@ -280,7 +280,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = PositionLogger/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = edu.mit.PositionLogger;
+				PRODUCT_BUNDLE_IDENTIFIER = edu.mit.PositionLogger123;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 			};

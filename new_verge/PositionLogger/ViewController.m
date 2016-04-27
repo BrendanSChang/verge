@@ -23,10 +23,10 @@
 
   CLLocation *targetLoc;
   CLLocation *startLoc;
-  CLLocation *prevLoc;
+  //CLLocation *prevLoc;
 
   double prevSpeed;
-  double eta;
+  //double eta;
   double thresholdDistance;
 }
 
@@ -34,11 +34,15 @@
   [super viewDidLoad];
 
   startLoc = NULL;
-  prevLoc = NULL;
+  //prevLoc = NULL;
   thresholdDistance = 30; //distance (in meters) where we say you've arrived
 
   prevSpeed = 0;
   eta = INFINITY;
+
+  [_accuracyControl addTarget:self
+                       action:@selector(action:)
+             forControlEvents:UIControlEventValueChanged];
 
   //location manager setup
   _locmgr = [[CLLocationManager alloc] init];
@@ -86,6 +90,28 @@
   return f;
 }
 
+- (void)action:(id)sender {
+  switch ([self.accuracyControl selectedSegmentIndex]) {
+    case Loc1:
+      _targetAddressLabel.text = @"Destination: 77 Mass Ave";
+      targetLoc = [[CLLocation alloc] initWithLatitude:42.3593071
+                                             longitude:-71.0957108];
+      break;
+    case Loc2:
+      _targetAddressLabel.text = @"Destination: Stata Center";
+      targetLoc = [[CLLocation alloc] initWithLatitude:42.3616423
+                                             longitude:-71.0928574];
+      break;
+    case Loc3:
+      _targetAddressLabel.text = @"Destination Walker Memorial";
+      targetLoc = [[CLLocation alloc] initWithLatitude:42.3593702
+                                             longitude:-71.09051];
+      break;
+    default:
+      NSLog(@"Didn't recognize loc");
+  }
+}
+
 - (void)didReceiveMemoryWarning {
   [super didReceiveMemoryWarning];
   // Dispose of any resources that can be recreated.
@@ -103,25 +129,7 @@
 }
 
 //TODO: Implement me
--(void)startRecordingLocationWithAccuracy:(Location)acc {
-  switch (acc) {
-    case Loc1:
-      _targetAddressLabel.text = @"77 Mass Ave.";
-      targetLoc = [[CLLocation alloc] initWithLatitude:42.3593071
-                                             longitude:-71.0957108];
-      break;
-    case Loc2:
-      _targetAddressLabel.text = @"Stata Center";
-      targetLoc = [[CLLocation alloc] initWithLatitude:42.3616423
-                                             longitude:-71.0928574];
-      break;
-    default:
-      _targetAddressLabel.text = @"Walker Memorial";
-      targetLoc = [[CLLocation alloc] initWithLatitude:42.3593702
-                                             longitude:-71.09051];
-      break;
-  }
-
+-(void)startRecordingLocationWithAccuracy:(Location)loc {
   [_locmgr startUpdatingLocation];
 }
 
@@ -207,6 +215,7 @@
 
 - (void)locationManager:(CLLocationManager *)manager
      didUpdateLocations:(NSArray<CLLocation *> *)locations {
+  //TODO: Prune readings based on accuracy?
   for (CLLocation *location in locations) {
     //If path hasn't been started, use the first location found.
     if (startLoc == NULL){
@@ -215,16 +224,17 @@
     
     if ([self arrivedAtDestination:location]) {
       [self stopRecordingLocationWithAccuracy];
-      _distanceToLabel.text = @"You've arrived!";
-      //TODO: stop recording location
+      _distanceToLabel.text = @"Distance: You've arrived!";
+      [self hitRecordStopButton:_startStopButton];
       //update UI
     }
     
 
     NSLog(@"Updating location");
-    _distanceToLabel.text = [NSString stringWithFormat: @"%f",
+    _distanceToLabel.text = [NSString stringWithFormat: @"Distance: %f",
                                 [self distanceBetween:targetLoc and:location]];
-    _speedLabel.text = [NSString stringWithFormat:@"%f", location.speed];
+    _speedLabel.text = [NSString stringWithFormat:@"Speed: %f", location.speed];
+    [self calculateEstimate:location];
     [self logLineToDataFile:
         [NSString stringWithFormat:@"%f,%f,%f,%f,%f,%f,%f,%f\n",
             [location.timestamp timeIntervalSince1970],
@@ -271,8 +281,9 @@
 
 # pragma mark - Helper Functions -
 
--(bool) arrivedAtDestination:(CLLocation *)currentLocation{
-  return [self distanceBetween:prevLoc and:currentLocation] < thresholdDistance;
+-(bool) arrivedAtDestination:(CLLocation *)currentLocation {
+  return [self distanceBetween:currentLocation
+                           and:targetLoc] < thresholdDistance;
 }
 
 -(double)distanceBetween:(CLLocation *)loc1 and:(CLLocation *)loc2 {
@@ -309,9 +320,9 @@
   return angleRadians;
 }
 
-//TODO: Calculate the estimate of the progress on the path.
+//TODO: Make more robust by EWMA'ing angle? Or averaging over previous velocities?
 -(void) calculateEstimate:(CLLocation *)location {
-  if (prevLoc != NULL && location.speed >= 0 && location.course >= 0) {
+  if (location.speed >= 0 && location.course >= 0) {
     // Generate destination vector.
     double distanceToDest = [self distanceBetween:location and:targetLoc];
     double angleToDest = [self angleBetween:location and:targetLoc];
@@ -321,11 +332,10 @@
     double projectedSpeed = location.speed * cos(angleDiff);
 
     double speed = EWMA_WEIGHT*projectedSpeed + (1 - EWMA_WEIGHT)*prevSpeed;
-    eta = distanceToDest / speed;
+    _ETALabel.text = [NSString stringWithFormat:@"ETA: %f",
+                      distanceToDest/speed];
     prevSpeed = speed;
   }
-
-  prevLoc = location;
 }
 
 @end
