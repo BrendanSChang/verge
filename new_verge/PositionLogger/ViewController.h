@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 #import <MessageUI/MessageUI.h>
 #import <CoreLocation/CoreLocation.h>
+#import <MapKit/MapKit.h>
 
 typedef enum {
     Loc1 = 0,
@@ -17,7 +18,7 @@ typedef enum {
     Loc4 = 3
 } Location;
 
-@interface ViewController : UIViewController<MFMailComposeViewControllerDelegate,CLLocationManagerDelegate>
+@interface ViewController : UIViewController<MFMailComposeViewControllerDelegate,CLLocationManagerDelegate,MKMapViewDelegate>
 
 @property IBOutlet UISegmentedControl *accuracyControl;
 @property IBOutlet UIButton *startStopButton;
@@ -32,6 +33,7 @@ typedef enum {
 @property (weak, nonatomic) IBOutlet UILabel *distanceToLabel;
 @property (weak, nonatomic) IBOutlet UILabel *targetAddressLabel;
 @property (weak, nonatomic) IBOutlet UILabel *timeLabel;
+@property (weak, nonatomic) IBOutlet MKMapView *mapView;
 
 @end
 

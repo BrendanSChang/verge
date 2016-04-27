@@ -36,6 +36,12 @@
 - (void)viewDidLoad {
   [super viewDidLoad];
 
+  self.mapView.delegate = self;
+  self.mapView.showsUserLocation = YES;
+  NSLog(@"Content scale factor is %f",self.mapView.contentScaleFactor);
+  
+  [self.mapView setUserTrackingMode:MKUserTrackingModeFollow];
+  
   startLoc = NULL;
   //prevLoc = NULL;
   thresholdDistance = 30; //distance (in meters) where we say you've arrived
