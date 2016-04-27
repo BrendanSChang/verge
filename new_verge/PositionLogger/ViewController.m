@@ -69,7 +69,7 @@
   }
 
   [self logLineToDataFile:
-            @"Time,Lat,Lon,Altitude,Accuracy,Heading,Speed,Battery,ETA\n"];
+            @"Time,Lat,Lon,Altitude,Accuracy,Heading,Speed,ETA\n"];
 
   // Do any additional setup after loading the view, typically from a nib.
 }
@@ -225,13 +225,7 @@
      didUpdateLocations:(NSArray<CLLocation *> *)locations {
   //TODO: Prune readings based on accuracy?
   for (CLLocation *location in locations) {
-    if (location.horizontalAccuracy < 30){
-      NSLog(@"Our location not accurate enough");
-      break;
-    } else {
-      NSLog(@"Horizontal accuracy %f", location.horizontalAccuracy);
-      NSLog(@"%f,%f",location.coordinate.latitude,location.coordinate.longitude);
-    }
+
     //If path hasn't been started, use the first location found.
     if (startLoc == NULL){
       startLoc = location;
@@ -240,6 +234,7 @@
     if ([self arrivedAtDestination:location]) {
       [self stopRecordingLocationWithAccuracy];
       _distanceToLabel.text = @"Distance: You've arrived!";
+      _ETALabel.text = @"But actually, you've arrived.";
       [self hitRecordStopButton:_startStopButton];
       //update UI
     }
@@ -252,7 +247,7 @@
     _speedLabel.text = [NSString stringWithFormat:@"Speed: %f", location.speed];
     _ETALabel.text = [NSString stringWithFormat:@"ETA: %f", eta];
     [self logLineToDataFile:
-        [NSString stringWithFormat:@"%f,%f,%f,%f,%f,%f,%f,%f,%f\n",
+        [NSString stringWithFormat:@"%f,%f,%f,%f,%f,%f,%f,%f\n",
             [location.timestamp timeIntervalSince1970],
             location.coordinate.latitude,
             location.coordinate.longitude,
@@ -260,7 +255,6 @@
             location.horizontalAccuracy,
             location.course,
             location.speed,
-            [[UIDevice currentDevice] batteryLevel],
             eta
         ]
     ];
@@ -310,7 +304,7 @@
   double lon1 = degToRad(loc1.coordinate.longitude);
   double lat2 = degToRad(loc2.coordinate.latitude);
   double lon2 = degToRad(loc2.coordinate.longitude);
-  double r = 6371; //radius of the earth, km
+  double r = 6371000; //radius of the earth, m
 
   double distance =
              2*r*asin(
@@ -341,14 +335,14 @@
 
 //TODO: Make more robust by EWMA'ing angle? Or averaging over previous velocities?
 -(void) calculateEstimate:(CLLocation *)location {
-  if (location.speed >= 0 && location.course >= 0) {
+  if (location.speed != -1 && location.course >= 0) {
     // Generate destination vector.
     double distanceToDest = [self distanceBetween:location and:targetLoc];
     double angleToDest = [self angleBetween:location and:targetLoc];
 
     // Calculate projection.
     double angleDiff = angleToDest - location.course;
-    double projectedSpeed = location.speed * cos(angleDiff);
+    double projectedSpeed = location.speed * fabs(cos(angleDiff));
 
     double speed = EWMA_WEIGHT*projectedSpeed + (1 - EWMA_WEIGHT)*prevSpeed;
     eta = distanceToDest/speed;
