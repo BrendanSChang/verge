@@ -7,6 +7,7 @@ Setup notes
 Currently working in new_verge to develop prototype.
 
 TODO:
+
 1. Add label for ETA.
 2. Keep a longer list of previous locations/velocities to average.
 3. Tune the EWMA weight.
