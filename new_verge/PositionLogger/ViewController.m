@@ -38,7 +38,7 @@
   thresholdDistance = 30; //distance (in meters) where we say you've arrived
 
   prevSpeed = 0;
-  eta = INFINITY;
+  //eta = INFINITY;
 
   [_accuracyControl addTarget:self
                        action:@selector(action:)
