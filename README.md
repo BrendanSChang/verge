@@ -8,9 +8,8 @@ Currently working in new_verge to develop prototype.
 
 TODO:
 
-1. Add label for ETA.
-2. Keep a longer list of previous locations/velocities to average.
-3. Tune the EWMA weight.
-4. Add arrival detection.
-5. Test the application along the three test destinations.
-6. Test different localization methods.
+1. Keep a longer list of previous locations/velocities to average.
+2. Tune the EWMA weight.
+3. Test the application along the four test destinations.
+4. Test different localization methods/begin working on indoor localization.
+5. Add map showing user location and projected velocity towards destination.

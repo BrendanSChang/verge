@@ -13,7 +13,8 @@
 typedef enum {
     Loc1 = 0,
     Loc2 = 1,
-    Loc3 = 2
+    Loc3 = 2,
+    Loc4 = 3
 } Location;
 
 @interface ViewController : UIViewController<MFMailComposeViewControllerDelegate,CLLocationManagerDelegate>

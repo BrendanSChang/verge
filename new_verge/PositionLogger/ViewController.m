@@ -103,9 +103,14 @@
                                              longitude:-71.0928574];
       break;
     case Loc3:
-      _targetAddressLabel.text = @"Destination Walker Memorial";
+      _targetAddressLabel.text = @"Destination: Walker Memorial";
       targetLoc = [[CLLocation alloc] initWithLatitude:42.3593702
                                              longitude:-71.09051];
+      break;
+    case Loc4:
+      _targetAddressLabel.text = @"Destination: Baker";
+      targetLoc = [[CLLocation alloc] initWithLatitude:42.3569925
+                                             longitude:-71.0957];
       break;
     default:
       NSLog(@"Didn't recognize loc");

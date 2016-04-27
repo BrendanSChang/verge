@@ -87,14 +87,6 @@
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <segmentedControl opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="osL-hL-eIy">
-                                <rect key="frame" x="56" y="68" width="209" height="29"/>
-                                <segments>
-                                    <segment title="Loc 1"/>
-                                    <segment title="Loc 2"/>
-                                    <segment title="Loc 3"/>
-                                </segments>
-                            </segmentedControl>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Destination" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Ho0-pD-cXY">
                                 <rect key="frame" x="117" y="124" width="87" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
@@ -114,6 +106,15 @@
                                     <action selector="hitRecordStopButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="wxu-7f-5gC"/>
                                 </connections>
                             </button>
+                            <segmentedControl opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="osL-hL-eIy">
+                                <rect key="frame" x="56" y="68" width="209" height="29"/>
+                                <segments>
+                                    <segment title="Loc 1"/>
+                                    <segment title="Loc 2"/>
+                                    <segment title="Loc 3"/>
+                                    <segment title="Loc 4"/>
+                                </segments>
+                            </segmentedControl>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
@@ -144,7 +145,7 @@
                     </view>
                     <connections>
                         <outlet property="ETALabel" destination="31K-Qj-REL" id="UKI-W7-7XM"/>
-                        <outlet property="accuracyControl" destination="osL-hL-eIy" id="985-C0-kyW"/>
+                        <outlet property="accuracyControl" destination="osL-hL-eIy" id="JJA-xi-hbZ"/>
                         <outlet property="distanceToLabel" destination="XdZ-3H-DvG" id="QOx-yq-2KW"/>
                         <outlet property="recordingIndicator" destination="3ZX-d9-vg4" id="B6X-jG-uxl"/>
                         <outlet property="speedLabel" destination="xkU-4M-hiX" id="WXk-nB-gcC"/>
