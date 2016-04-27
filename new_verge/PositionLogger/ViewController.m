@@ -12,6 +12,9 @@
 
 #define EWMA_WEIGHT .75
 
+#define degToRad(x) (M_PI * (x) / 180.0)
+#define radToDeg(x) ((x) * 180.0 / M_PI)
+
 @interface ViewController ()
 @end
 
@@ -26,7 +29,7 @@
   //CLLocation *prevLoc;
 
   double prevSpeed;
-  //double eta;
+  double eta;
   double thresholdDistance;
 }
 
@@ -38,7 +41,7 @@
   thresholdDistance = 30; //distance (in meters) where we say you've arrived
 
   prevSpeed = 0;
-  //eta = INFINITY;
+  eta = INFINITY;
 
   [_accuracyControl addTarget:self
                        action:@selector(action:)
@@ -66,7 +69,7 @@
   }
 
   [self logLineToDataFile:
-            @"Time,Lat,Lon,Altitude,Accuracy,Heading,Speed,Battery\n"];
+            @"Time,Lat,Lon,Altitude,Accuracy,Heading,Speed,Battery,ETA\n"];
 
   // Do any additional setup after loading the view, typically from a nib.
 }
@@ -222,6 +225,13 @@
      didUpdateLocations:(NSArray<CLLocation *> *)locations {
   //TODO: Prune readings based on accuracy?
   for (CLLocation *location in locations) {
+    if (location.horizontalAccuracy < 30){
+      NSLog(@"Our location not accurate enough");
+      break;
+    } else {
+      NSLog(@"Horizontal accuracy %f", location.horizontalAccuracy);
+      NSLog(@"%f,%f",location.coordinate.latitude,location.coordinate.longitude);
+    }
     //If path hasn't been started, use the first location found.
     if (startLoc == NULL){
       startLoc = location;
@@ -234,14 +244,15 @@
       //update UI
     }
     
+    [self calculateEstimate:location];
 
-    NSLog(@"Updating location");
+//    NSLog(@"Updating location");
     _distanceToLabel.text = [NSString stringWithFormat: @"Distance: %f",
                                 [self distanceBetween:targetLoc and:location]];
     _speedLabel.text = [NSString stringWithFormat:@"Speed: %f", location.speed];
-    [self calculateEstimate:location];
+    _ETALabel.text = [NSString stringWithFormat:@"ETA: %f", eta];
     [self logLineToDataFile:
-        [NSString stringWithFormat:@"%f,%f,%f,%f,%f,%f,%f,%f\n",
+        [NSString stringWithFormat:@"%f,%f,%f,%f,%f,%f,%f,%f,%f\n",
             [location.timestamp timeIntervalSince1970],
             location.coordinate.latitude,
             location.coordinate.longitude,
@@ -249,7 +260,8 @@
             location.horizontalAccuracy,
             location.course,
             location.speed,
-            [[UIDevice currentDevice] batteryLevel]
+            [[UIDevice currentDevice] batteryLevel],
+            eta
         ]
     ];
   }
@@ -287,16 +299,18 @@
 # pragma mark - Helper Functions -
 
 -(bool) arrivedAtDestination:(CLLocation *)currentLocation {
+  NSLog(@"We arrived: %d",([self distanceBetween:currentLocation
+                                            and:targetLoc] < thresholdDistance));
   return [self distanceBetween:currentLocation
                            and:targetLoc] < thresholdDistance;
 }
 
 -(double)distanceBetween:(CLLocation *)loc1 and:(CLLocation *)loc2 {
-  double lat1 = loc1.coordinate.latitude;
-  double lon1 = loc1.coordinate.longitude;
-  double lat2 = loc2.coordinate.latitude;
-  double lon2 = loc2.coordinate.longitude;
-  double r = 6371;
+  double lat1 = degToRad(loc1.coordinate.latitude);
+  double lon1 = degToRad(loc1.coordinate.longitude);
+  double lat2 = degToRad(loc2.coordinate.latitude);
+  double lon2 = degToRad(loc2.coordinate.longitude);
+  double r = 6371; //radius of the earth, km
 
   double distance =
              2*r*asin(
@@ -322,7 +336,7 @@
     angleRadians += 2*M_PI;
   }
 
-  return angleRadians;
+  return radToDeg(angleRadians);
 }
 
 //TODO: Make more robust by EWMA'ing angle? Or averaging over previous velocities?
@@ -337,8 +351,7 @@
     double projectedSpeed = location.speed * cos(angleDiff);
 
     double speed = EWMA_WEIGHT*projectedSpeed + (1 - EWMA_WEIGHT)*prevSpeed;
-    _ETALabel.text = [NSString stringWithFormat:@"ETA: %f",
-                      distanceToDest/speed];
+    eta = distanceToDest/speed;
     prevSpeed = speed;
   }
 }
