@@ -10,7 +10,9 @@
 
 #define kDATA_FILE_NAME @"log.csv"
 
+//TODO: These need to be tuned.
 #define EWMA_WEIGHT .75
+#define INTERVAL 1
 
 #define degToRad(x) (M_PI * (x) / 180.0)
 #define radToDeg(x) ((x) * 180.0 / M_PI)
@@ -20,6 +22,8 @@
 
 @implementation ViewController {
   CLLocationManager *_locmgr;
+  CMMotionManager *_motmgr;
+  CMPedometer *_pedometer;
   BOOL _isRecording;
   NSFileHandle *_f;
   UIAlertController *_alert;
@@ -31,6 +35,7 @@
   double prevSpeed;
   double eta;
   double thresholdDistance;
+  double prevDist;
 }
 
 - (void)viewDidLoad {
@@ -44,10 +49,12 @@
   
   startLoc = NULL;
   //prevLoc = NULL;
-  thresholdDistance = 30; //distance (in meters) where we say you've arrived
 
   prevSpeed = 0;
   eta = INFINITY;
+  thresholdDistance = 30; //Distance in meters to discern arrival.
+                          //TODO: Needs to be tuned.
+  prevDist = 0; //Only used for indoor localization with pedometer.
 
   [_accuracyControl addTarget:self
                        action:@selector(action:)
@@ -62,6 +69,16 @@
   [_locmgr disallowDeferredLocationUpdates];
   _locmgr.desiredAccuracy = kCLLocationAccuracyBest;
 
+  //motion manager setup
+  _motmgr = [[CMMotionManager alloc] init];
+  _motmgr.accelerometerUpdateInterval = INTERVAL;
+  _motmgr.gyroUpdateInterval = INTERVAL;
+  _motmgr.magnetometerUpdateInterval = INTERVAL;
+  _motmgr.deviceMotionUpdateInterval = INTERVAL;
+  
+  //pedometer setup
+  _pedometer = [[CMPedometer alloc] init];
+  
   //battery logging setup
   [[UIDevice currentDevice] setBatteryMonitoringEnabled:TRUE];
   //UI setup
@@ -152,6 +169,101 @@
 }
 
 
+//TODO: Write these values to file.
+-(void)startRecordingIMUData {
+  [_motmgr
+      startAccelerometerUpdatesToQueue:[[NSOperationQueue alloc] init]
+      withHandler:^(CMAccelerometerData *data, NSError *error) {
+        if (error) {
+          NSLog(@"Accelerometer error");
+        } else {
+          NSLog(@"Acceleration x: %f", data.acceleration.x);
+          NSLog(@"Acceleration y: %f", data.acceleration.y);
+          NSLog(@"Acceleration z: %f", data.acceleration.z);
+        }
+      }
+  ];
+  
+  [_motmgr
+      startGyroUpdatesToQueue:[[NSOperationQueue alloc] init]
+      withHandler:^(CMGyroData *data, NSError *error) {
+        if (error) {
+          NSLog(@"Gyroscope error");
+        } else {
+          NSLog(@"Gyro Rotation x: %f", data.rotationRate.x);
+          NSLog(@"Gyro Rotation y: %f", data.rotationRate.y);
+          NSLog(@"Gyro Rotation z: %f", data.rotationRate.z);
+        }
+      }
+  ];
+  
+  [_motmgr
+      startMagnetometerUpdatesToQueue:[[NSOperationQueue alloc] init]
+      withHandler:^(CMMagnetometerData *data, NSError *error) {
+        if (error) {
+          NSLog(@"Magnetometer error");
+        } else {
+          NSLog(@"Magnetic Field x: %f", data.magneticField.x);
+          NSLog(@"Magnetic Field y: %f", data.magneticField.y);
+          NSLog(@"Magnetic Field z: %f", data.magneticField.z);
+        }
+      }
+  ];
+}
+
+-(void)stopRecordingIMUData {
+  [_motmgr stopAccelerometerUpdates];
+  [_motmgr stopGyroUpdates];
+  [_motmgr stopMagnetometerUpdates];
+}
+
+-(void)startPedometer {
+  [_pedometer
+      startPedometerUpdatesFromDate:[NSDate date]
+      withHandler:^(CMPedometerData *data, NSError *error) {
+        if (error) {
+          NSLog(@"Pedometer error");
+        } else {
+          double curDist = [data.distance doubleValue];
+          double delta = curDist - prevDist;
+          prevDist = curDist;
+
+          NSLog(@"Distance moved: %f", delta);
+        }
+      }
+  ];
+}
+
+-(void)stopPedometer {
+  [_pedometer stopPedometerUpdates];
+}
+
+-(void)startRecordingDeviceMotionData {
+  //TODO: Check if reference frames are available.
+  //TODO: This uses magnetic north because we're assuming that we're indoors and
+  //      can't get accurate GPS readings. Should probably do something about
+  //      magnetic declination.
+  [_motmgr
+      startDeviceMotionUpdatesUsingReferenceFrame:
+          CMAttitudeReferenceFrameXMagneticNorthZVertical
+      toQueue:[[NSOperationQueue alloc] init]
+      withHandler:^(CMDeviceMotion *data, NSError *error) {
+        CMRotationMatrix rotation = data.attitude.rotationMatrix;
+        double heading = radToDeg(M_PI + atan2(rotation.m22, rotation.m12));
+        NSLog(@"Estimated heading: %f", heading);
+        /*
+        dispatch_async(dispatch_get_main_queue(), ^{
+          // Do any UI updates in here.
+        });
+        */
+      }
+  ];
+}
+
+-(void)stopRecordingDeviceMotionData {
+  [_motmgr stopDeviceMotionUpdates];
+}
+
 -(IBAction)hitRecordStopButton:(UIButton *)b {
   startLoc = NULL;
   if (!_isRecording) {
@@ -239,31 +351,31 @@
     
     if ([self arrivedAtDestination:location]) {
       [self stopRecordingLocationWithAccuracy];
-      _distanceToLabel.text = @"Distance: You've arrived!";
-      _ETALabel.text = @"But actually, you've arrived.";
+      _distanceToLabel.text = @"Distance: You've arrived";
+      _ETALabel.text = @"ETA: You've arrived";
       [self hitRecordStopButton:_startStopButton];
-      //update UI
-    }
+    } else {
     
-    [self calculateEstimate:location];
+      [self calculateEstimate:location];
 
-//    NSLog(@"Updating location");
-    _distanceToLabel.text = [NSString stringWithFormat: @"Distance: %f",
-                                [self distanceBetween:targetLoc and:location]];
-    _speedLabel.text = [NSString stringWithFormat:@"Speed: %f", location.speed];
-    _ETALabel.text = [NSString stringWithFormat:@"ETA: %f", eta];
-    [self logLineToDataFile:
-        [NSString stringWithFormat:@"%f,%f,%f,%f,%f,%f,%f,%f\n",
-            [location.timestamp timeIntervalSince1970],
-            location.coordinate.latitude,
-            location.coordinate.longitude,
-            location.altitude,
-            location.horizontalAccuracy,
-            location.course,
-            location.speed,
-            eta
-        ]
-    ];
+  //    NSLog(@"Updating location");
+      _distanceToLabel.text = [NSString stringWithFormat: @"Distance: %f",
+                                  [self distanceBetween:targetLoc and:location]];
+      _speedLabel.text = [NSString stringWithFormat:@"Speed: %f", location.speed];
+      _ETALabel.text = [NSString stringWithFormat:@"ETA: %f", eta];
+      [self logLineToDataFile:
+          [NSString stringWithFormat:@"%f,%f,%f,%f,%f,%f,%f,%f\n",
+              [location.timestamp timeIntervalSince1970],
+              location.coordinate.latitude,
+              location.coordinate.longitude,
+              location.altitude,
+              location.horizontalAccuracy,
+              location.course,
+              location.speed,
+              eta
+          ]
+      ];
+    }
   }
 }
 

@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 #import <MessageUI/MessageUI.h>
 #import <CoreLocation/CoreLocation.h>
+#import <CoreMotion/CoreMotion.h>
 #import <MapKit/MapKit.h>
 
 typedef enum {
