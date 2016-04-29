@@ -19,7 +19,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Click to toggle recording" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Uc5-QJ-BRF">
-                                <rect key="frame" x="0.0" y="212" width="320" height="21"/>
+                                <rect key="frame" x="0.0" y="167" width="320" height="21"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="21" id="bgE-cX-gCy"/>
                                 </constraints>
@@ -37,7 +37,7 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <button opaque="NO" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="gUb-jQ-7wN">
-                                <rect key="frame" x="52" y="434" width="216" height="30"/>
+                                <rect key="frame" x="52" y="359" width="216" height="30"/>
                                 <state key="normal" title="Email Log File"/>
                                 <userDefinedRuntimeAttributes>
                                     <userDefinedRuntimeAttribute type="number" keyPath="layer.borderWidth">
@@ -51,11 +51,11 @@
                                     <action selector="emailLogFile:" destination="BYZ-38-t0r" eventType="touchUpInside" id="OR1-gz-I9R"/>
                                 </connections>
                             </button>
-                            <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="3ZX-d9-vg4">
-                                <rect key="frame" x="76" y="234" width="20" height="20"/>
+                            <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" misplaced="YES" hidesWhenStopped="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="3ZX-d9-vg4">
+                                <rect key="frame" x="76" y="189" width="20" height="20"/>
                             </activityIndicatorView>
                             <button opaque="NO" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ZFo-aY-i2m">
-                                <rect key="frame" x="52" y="472" width="216" height="30"/>
+                                <rect key="frame" x="52" y="397" width="216" height="30"/>
                                 <state key="normal" title="Clear Log File"/>
                                 <userDefinedRuntimeAttributes>
                                     <userDefinedRuntimeAttribute type="number" keyPath="layer.borderWidth">
@@ -70,19 +70,19 @@
                                 </connections>
                             </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" text="Speed" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="xkU-4M-hiX">
-                                <rect key="frame" x="135" y="346" width="50" height="21"/>
+                                <rect key="frame" x="135" y="301" width="50" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" text="ETA" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="31K-Qj-REL">
-                                <rect key="frame" x="145" y="288" width="30" height="21"/>
+                                <rect key="frame" x="145" y="243" width="30" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" text="Distance to target" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="XdZ-3H-DvG">
-                                <rect key="frame" x="92" y="375" width="137" height="21"/>
+                                <rect key="frame" x="92" y="330" width="137" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
@@ -94,13 +94,13 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" text="Time" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5hk-VB-YR2">
-                                <rect key="frame" x="143" y="317" width="38" height="21"/>
+                                <rect key="frame" x="143" y="272" width="38" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="xbk-aA-aGR">
-                                <rect key="frame" x="98" y="234" width="124" height="30"/>
+                                <rect key="frame" x="98" y="189" width="124" height="30"/>
                                 <state key="normal" title="Start"/>
                                 <connections>
                                     <action selector="hitRecordStopButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="wxu-7f-5gC"/>
@@ -115,6 +115,9 @@
                                     <segment title="Loc 4"/>
                                 </segments>
                             </segmentedControl>
+                            <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="uG9-Or-bZR">
+                                <rect key="frame" x="20" y="435" width="280" height="125"/>
+                            </mapView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
@@ -126,15 +129,20 @@
                             <constraint firstItem="osL-hL-eIy" firstAttribute="top" secondItem="AQN-T1-kYl" secondAttribute="bottom" constant="48" id="7a9-xI-o4g"/>
                             <constraint firstItem="xbk-aA-aGR" firstAttribute="leading" secondItem="3ZX-d9-vg4" secondAttribute="trailing" constant="2" id="A9B-re-IXy"/>
                             <constraint firstItem="Ho0-pD-cXY" firstAttribute="top" secondItem="AQN-T1-kYl" secondAttribute="bottom" constant="104" id="Ayq-69-8C6"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="uG9-Or-bZR" secondAttribute="trailing" id="CU1-0w-PzT"/>
                             <constraint firstItem="osL-hL-eIy" firstAttribute="centerX" secondItem="jNZ-UQ-NGD" secondAttribute="centerX" id="D8G-zj-63g"/>
                             <constraint firstItem="gUb-jQ-7wN" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="EXr-zj-GfH"/>
+                            <constraint firstItem="uG9-Or-bZR" firstAttribute="top" secondItem="ZFo-aY-i2m" secondAttribute="bottom" constant="8" id="L7g-LZ-tYZ"/>
                             <constraint firstItem="5hk-VB-YR2" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="Msf-ZP-DvH"/>
                             <constraint firstItem="Uc5-QJ-BRF" firstAttribute="top" secondItem="osL-hL-eIy" secondAttribute="bottom" constant="54" id="VDw-9v-Vrl"/>
                             <constraint firstItem="xbk-aA-aGR" firstAttribute="top" secondItem="Uc5-QJ-BRF" secondAttribute="bottom" constant="18" id="VYC-iW-gPS"/>
                             <constraint firstItem="Ho0-pD-cXY" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="W7x-fd-Blz"/>
                             <constraint firstItem="Uc5-QJ-BRF" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="ZHw-L3-pXV"/>
                             <constraint firstItem="Uc5-QJ-BRF" firstAttribute="centerX" secondItem="xbk-aA-aGR" secondAttribute="centerX" id="Zk7-eC-wj9"/>
+                            <constraint firstAttribute="leadingMargin" secondItem="uG9-Or-bZR" secondAttribute="leading" id="a9l-NJ-Bhk"/>
+                            <constraint firstItem="8or-g6-LsI" firstAttribute="top" secondItem="uG9-Or-bZR" secondAttribute="bottom" constant="8" id="cz4-FN-tbi"/>
                             <constraint firstItem="xkU-4M-hiX" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="fjc-z1-Mlp"/>
+                            <constraint firstItem="uG9-Or-bZR" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="gUe-Gz-D6h"/>
                             <constraint firstItem="XdZ-3H-DvG" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="ga1-SC-GYw"/>
                             <constraint firstItem="Uc5-QJ-BRF" firstAttribute="leading" secondItem="jNZ-UQ-NGD" secondAttribute="leading" id="jbW-VB-Iqm"/>
                             <constraint firstItem="Uc5-QJ-BRF" firstAttribute="trailing" secondItem="jNZ-UQ-NGD" secondAttribute="trailing" id="sWd-9G-xvF"/>
@@ -147,6 +155,7 @@
                         <outlet property="ETALabel" destination="31K-Qj-REL" id="UKI-W7-7XM"/>
                         <outlet property="accuracyControl" destination="osL-hL-eIy" id="JJA-xi-hbZ"/>
                         <outlet property="distanceToLabel" destination="XdZ-3H-DvG" id="QOx-yq-2KW"/>
+                        <outlet property="mapView" destination="uG9-Or-bZR" id="7T6-9J-gLF"/>
                         <outlet property="recordingIndicator" destination="3ZX-d9-vg4" id="B6X-jG-uxl"/>
                         <outlet property="speedLabel" destination="xkU-4M-hiX" id="WXk-nB-gcC"/>
                         <outlet property="startStopButton" destination="xbk-aA-aGR" id="obg-bV-Fvx"/>
