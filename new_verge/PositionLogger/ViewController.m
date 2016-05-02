@@ -9,6 +9,11 @@
 #import "ViewController.h"
 
 #define kDATA_FILE_NAME @"log.csv"
+#define magDATA_FILE_NAME @"magnetometerData.csv"
+#define gyroDATA_FILE_NAME @"gyroscopeData.csv"
+#define accDATA_FILE_NAME @"accelerometerData.csv"
+#define pedDATA_FILE_NAME @"pedometerData.csv"
+#define devmotDATA_FILE_NAME @"devicemotionData.csv"
 
 //TODO: These need to be tuned.
 #define EWMA_WEIGHT .75
@@ -25,9 +30,9 @@
   CMMotionManager *_motmgr;
   CMPedometer *_pedometer;
   BOOL _isRecording;
-  NSFileHandle *_f;
+  NSFileHandle *_f,*_mag,*_gyro,*_acc,*_ped,*_devmot;
   UIAlertController *_alert;
-
+  
   CLLocation *targetLoc;
   CLLocation *startLoc;
   //CLLocation *prevLoc;
@@ -39,8 +44,9 @@
 }
 
 - (void)viewDidLoad {
+  
   [super viewDidLoad];
-
+  
   self.mapView.delegate = self;
   self.mapView.showsUserLocation = YES;
   NSLog(@"Content scale factor is %f",self.mapView.contentScaleFactor);
@@ -85,34 +91,83 @@
   self.recordingIndicator.hidesWhenStopped = TRUE;
   self.startStopButton.layer.borderWidth = 1.0;
   self.startStopButton.layer.cornerRadius = 5.0;
-
-  _f  = [self openFileForWriting];
-  if (!_f) {
-    NSAssert(_f, @"Couldn't open file for writing.");
-  }
-
-  [self logLineToDataFile:
-            @"Time,Lat,Lon,Altitude,Accuracy,Heading,Speed,ETA\n"];
+  
+  [self initializeAllFileHandles];
+  [self writeFileHeaders];
+  
 
   // Do any additional setup after loading the view, typically from a nib.
 }
 
--(NSString *)getPathToLogFile {
+#pragma mark - Handling File Handles -
+-(void) initializeAllFileHandles{
+  
+  _f  = [self openFileForWriting:kDATA_FILE_NAME];
+  if (!_f) {
+    NSAssert(_f, @"Couldn't open file for writing.");
+  }
+  
+  _acc  = [self openFileForWriting:accDATA_FILE_NAME];
+  if (!_acc) {
+    NSAssert(_acc, @"Couldn't open file for writing.");
+  }
+  
+  _gyro  = [self openFileForWriting:gyroDATA_FILE_NAME];
+  if (!_gyro) {
+    NSAssert(_gyro, @"Couldn't open file for writing.");
+  }
+  
+  _mag  = [self openFileForWriting:magDATA_FILE_NAME];
+  if (!_mag) {
+    NSAssert(_mag, @"Couldn't open file for writing.");
+  }
+  
+  _ped  = [self openFileForWriting:pedDATA_FILE_NAME];
+  if (!_ped) {
+    NSAssert(_ped, @"Couldn't open file for writing.");
+  }
+  
+  _devmot  = [self openFileForWriting:devmotDATA_FILE_NAME];
+  if (!_devmot) {
+    NSAssert(_devmot, @"Couldn't open file for writing.");
+  }
+  
+}
+
+-(void) writeFileHeaders{
+  [self logLine:@"Time,Lat,Lon,Altitude,Accuracy,Heading,Speed,ETA\n" ToDataFile:kDATA_FILE_NAME];
+  [self logLine:@"Time,X,Y,Z\n" ToDataFile:magDATA_FILE_NAME]; //TODO: write file header for magnometer data
+  [self logLine:@"Time,X,Y,Z\n" ToDataFile:gyroDATA_FILE_NAME]; //TODO: write file header for gyroscope data
+  [self logLine:@"Time,X,Y,Z\n" ToDataFile:accDATA_FILE_NAME]; //TODO: write file header for accelerometer data
+  [self logLine:@"Time,Distance\n" ToDataFile:pedDATA_FILE_NAME];
+  [self logLine:@"Time,Heading\n" ToDataFile:devmotDATA_FILE_NAME];
+}
+
+-(void) closeAllFiles{
+  [_f closeFile];
+  [_acc closeFile];
+  [_gyro closeFile];
+  [_mag closeFile];
+  [_ped closeFile];
+  [_devmot closeFile];
+}
+
+-(NSString *)getPathToLogFile:(NSString *) fileName {
   NSArray *paths = NSSearchPathForDirectoriesInDomains(
                        NSDocumentDirectory, NSUserDomainMask, YES);
   NSString *documentsDirectory = [paths objectAtIndex:0];
   NSString *filePath =
-      [documentsDirectory stringByAppendingPathComponent:kDATA_FILE_NAME];
+      [documentsDirectory stringByAppendingPathComponent:fileName];
   return filePath;
 }
 
--(NSFileHandle *)openFileForWriting {
+-(NSFileHandle *)openFileForWriting:(NSString *) fileName {
   NSFileManager *fileManager = [NSFileManager defaultManager];
   NSFileHandle *f;
-  [fileManager createFileAtPath:[self getPathToLogFile]
+  [fileManager createFileAtPath:[self getPathToLogFile:fileName]
                        contents:nil
                      attributes:nil];
-  f = [NSFileHandle fileHandleForWritingAtPath:[self getPathToLogFile]];
+  f = [NSFileHandle fileHandleForWritingAtPath:[self getPathToLogFile:fileName]];
   return f;
 }
 
@@ -148,24 +203,52 @@
   // Dispose of any resources that can be recreated.
 }
 
--(void)logLineToDataFile:(NSString *)line {
-  [_f writeData:[line dataUsingEncoding:NSUTF8StringEncoding]];
+-(void)logLine:(NSString *)line ToDataFile:(NSString *)fileName {
+  NSFileHandle *handle = [self getHandleOfFile:fileName];
+  [handle writeData:[line dataUsingEncoding:NSUTF8StringEncoding]];
+}
+
+//Returns appropriate file handle based upon the file name we want to write to
+-(NSFileHandle *)getHandleOfFile:(NSString *) fileName{
+  //Objective-C can't handle switching on NSStrings...
+  if ([fileName isEqual: kDATA_FILE_NAME]){
+    return _f;
+  } else if ([fileName isEqual: magDATA_FILE_NAME]) {
+    return _mag;
+  } else if ([fileName isEqual: gyroDATA_FILE_NAME]) {
+    return _gyro;
+  } else if ([fileName isEqual: accDATA_FILE_NAME]) {
+    return _acc;
+  } else if ([fileName isEqual: pedDATA_FILE_NAME]){
+    return _ped;
+  } else if ([fileName isEqual: devmotDATA_FILE_NAME]){
+    return _devmot;
+  } else {
+    NSLog(@"File name didn't correspond to file handle.");
+  }
+  
+  return [[NSFileHandle alloc]init];
 }
 
 -(void)resetLogFile {
-  [_f closeFile];
-  _f = [self openFileForWriting];
-  if (!_f)
-    NSAssert(_f, @"Couldn't open file for writing.");
+  [self closeAllFiles];
+  [self initializeAllFileHandles];
+  [self writeFileHeaders];
 }
 
 //TODO: Implement me
 -(void)startRecordingLocationWithAccuracy:(Location)loc {
   [_locmgr startUpdatingLocation];
+  [self startRecordingIMUData];
+  [self startRecordingDeviceMotionData];
+  [self startPedometer];
 }
 
 -(void)stopRecordingLocationWithAccuracy {
   [_locmgr stopUpdatingLocation];
+  [self stopRecordingIMUData];
+  [self stopPedometer];
+  
 }
 
 
@@ -177,9 +260,13 @@
         if (error) {
           NSLog(@"Accelerometer error");
         } else {
-          NSLog(@"Acceleration x: %f", data.acceleration.x);
-          NSLog(@"Acceleration y: %f", data.acceleration.y);
-          NSLog(@"Acceleration z: %f", data.acceleration.z);
+          NSString *line = [NSString stringWithFormat:@"%@,%f,%f,%f\n",
+                            [NSDate date],
+                            data.acceleration.x,
+                            data.acceleration.y,
+                            data.acceleration.z
+                            ];
+          [self logLine:line ToDataFile:accDATA_FILE_NAME];
         }
       }
   ];
@@ -190,9 +277,13 @@
         if (error) {
           NSLog(@"Gyroscope error");
         } else {
-          NSLog(@"Gyro Rotation x: %f", data.rotationRate.x);
-          NSLog(@"Gyro Rotation y: %f", data.rotationRate.y);
-          NSLog(@"Gyro Rotation z: %f", data.rotationRate.z);
+          NSString *line = [NSString stringWithFormat:@"%@,%f,%f,%f\n",
+                            [NSDate date],
+                            data.rotationRate.x,
+                            data.rotationRate.y,
+                            data.rotationRate.z
+                            ];
+          [self logLine:line ToDataFile:gyroDATA_FILE_NAME];
         }
       }
   ];
@@ -203,9 +294,13 @@
         if (error) {
           NSLog(@"Magnetometer error");
         } else {
-          NSLog(@"Magnetic Field x: %f", data.magneticField.x);
-          NSLog(@"Magnetic Field y: %f", data.magneticField.y);
-          NSLog(@"Magnetic Field z: %f", data.magneticField.z);
+          NSString *line = [NSString stringWithFormat:@"%@,%f,%f,%f\n",
+                            [NSDate date],
+                            data.magneticField.x,
+                            data.magneticField.y,
+                            data.magneticField.z
+                            ];
+          [self logLine:line ToDataFile:magDATA_FILE_NAME];
         }
       }
   ];
@@ -227,8 +322,11 @@
           double curDist = [data.distance doubleValue];
           double delta = curDist - prevDist;
           prevDist = curDist;
-
-          NSLog(@"Distance moved: %f", delta);
+          NSString *line = [NSString stringWithFormat:@"%@,%f\n",
+                            [NSDate date],
+                            delta
+                            ];
+          [self logLine:line ToDataFile:pedDATA_FILE_NAME];
         }
       }
   ];
@@ -250,7 +348,13 @@
       withHandler:^(CMDeviceMotion *data, NSError *error) {
         CMRotationMatrix rotation = data.attitude.rotationMatrix;
         double heading = radToDeg(M_PI + atan2(rotation.m22, rotation.m12));
-        NSLog(@"Estimated heading: %f", heading);
+        
+        NSString *line = [NSString stringWithFormat:@"%@,%f\n",
+                          [NSDate date],
+                          heading
+                          ];
+        [self logLine:line ToDataFile:devmotDATA_FILE_NAME];
+        
         /*
         dispatch_async(dispatch_get_main_queue(), ^{
           // Do any UI updates in here.
@@ -313,11 +417,6 @@
     return;
   }
 
-  NSData *fileData = [NSData dataWithContentsOfFile:[self getPathToLogFile]];
-  if (!fileData || [fileData length] == 0) {
-    return;
-  }
-
   NSString *emailTitle = @"Position File";
   NSString *messageBody = @"Data from PositionLogger";
 
@@ -325,17 +424,35 @@
   mc.mailComposeDelegate = self;
   [mc setSubject:emailTitle];
   [mc setMessageBody:messageBody isHTML:NO];
-
-  // Determine the MIME type
-  NSString *mimeType = @"text/plain";
-
-  // Add attachment
-  [mc addAttachmentData:fileData mimeType:mimeType fileName:kDATA_FILE_NAME];
+  
+  //Attach all necessary data files
+  [self addAttachment:kDATA_FILE_NAME To:mc];
+  [self addAttachment:magDATA_FILE_NAME To:mc];
+  [self addAttachment:gyroDATA_FILE_NAME To:mc];
+  [self addAttachment:accDATA_FILE_NAME To:mc];
+  [self addAttachment:pedDATA_FILE_NAME To:mc];
+  [self addAttachment:devmotDATA_FILE_NAME To:mc];
 
   // Present mail view controller on screen
   [self presentViewController:mc animated:YES completion:NULL];
 }
 
+-(void) addAttachment:(NSString *)fileName To:(MFMailComposeViewController *)mc{
+  
+  //Get contents of file
+  NSData *fileData = [NSData dataWithContentsOfFile:[self getPathToLogFile:fileName]];
+  if (!fileData || [fileData length] == 0) {
+    NSLog(@"THE DATA FILE IS EMPTY");
+    return;
+  }
+  
+  // Determine the MIME type
+  NSString *mimeType = @"text/plain";
+  
+  // Add attachment
+  [mc addAttachmentData:fileData mimeType:mimeType fileName:fileName];
+  
+}
 
 #pragma mark - CLLocationManagerDelegate Methods -
 
@@ -363,7 +480,7 @@
                                   [self distanceBetween:targetLoc and:location]];
       _speedLabel.text = [NSString stringWithFormat:@"Speed: %f", location.speed];
       _ETALabel.text = [NSString stringWithFormat:@"ETA: %f", eta];
-      [self logLineToDataFile:
+      [self logLine:
           [NSString stringWithFormat:@"%f,%f,%f,%f,%f,%f,%f,%f\n",
               [location.timestamp timeIntervalSince1970],
               location.coordinate.latitude,
@@ -373,11 +490,12 @@
               location.course,
               location.speed,
               eta
-          ]
+          ] ToDataFile:kDATA_FILE_NAME
       ];
     }
   }
 }
+
 
 
 #pragma mark - MFMailComposeViewControllerDelegate Methods -
@@ -411,9 +529,7 @@
 # pragma mark - Helper Functions -
 
 -(bool) arrivedAtDestination:(CLLocation *)currentLocation {
-  NSLog(@"We arrived: %d",([self distanceBetween:currentLocation
-                                            and:targetLoc] < thresholdDistance));
-  return [self distanceBetween:currentLocation
+    return [self distanceBetween:currentLocation
                            and:targetLoc] < thresholdDistance;
 }
 
