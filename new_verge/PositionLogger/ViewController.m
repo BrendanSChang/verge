@@ -14,6 +14,7 @@
 #define accDATA_FILE_NAME @"accelerometerData.csv"
 #define pedDATA_FILE_NAME @"pedometerData.csv"
 #define devmotDATA_FILE_NAME @"devicemotionData.csv"
+#define headingDATA_FILE_NAME @"headingData.csv"
 
 //TODO: These need to be tuned.
 #define EWMA_WEIGHT .75
@@ -30,7 +31,7 @@
   CMMotionManager *_motmgr;
   CMPedometer *_pedometer;
   BOOL _isRecording;
-  NSFileHandle *_f,*_mag,*_gyro,*_acc,*_ped,*_devmot;
+  NSFileHandle *_f,*_mag,*_gyro,*_acc,*_ped,*_devmot,*_heading;
   UIAlertController *_alert;
   
   CLLocation *targetLoc;
@@ -127,7 +128,12 @@
     NSAssert(_ped, @"Couldn't open file for writing.");
   }
   
-  _devmot  = [self openFileForWriting:devmotDATA_FILE_NAME];
+  _devmot = [self openFileForWriting:devmotDATA_FILE_NAME];
+  if (!_devmot) {
+    NSAssert(_devmot, @"Couldn't open file for writing.");
+  }
+  
+  _heading = [self openFileForWriting:devmotDATA_FILE_NAME];
   if (!_devmot) {
     NSAssert(_devmot, @"Couldn't open file for writing.");
   }
@@ -141,6 +147,7 @@
   [self logLine:@"Time,X,Y,Z\n" ToDataFile:accDATA_FILE_NAME]; //TODO: write file header for accelerometer data
   [self logLine:@"Time,Distance\n" ToDataFile:pedDATA_FILE_NAME];
   [self logLine:@"Time,Heading\n" ToDataFile:devmotDATA_FILE_NAME];
+  [self logLine:@"Time,Heading\n" ToDataFile:headingDATA_FILE_NAME];
 }
 
 -(void) closeAllFiles{
@@ -150,6 +157,7 @@
   [_mag closeFile];
   [_ped closeFile];
   [_devmot closeFile];
+  [_heading closeFile];
 }
 
 -(NSString *)getPathToLogFile:(NSString *) fileName {
@@ -223,6 +231,8 @@
     return _ped;
   } else if ([fileName isEqual: devmotDATA_FILE_NAME]){
     return _devmot;
+  } else if ([fileName isEqual: headingDATA_FILE_NAME]){
+    return _heading;
   } else {
     NSLog(@"File name didn't correspond to file handle.");
   }
@@ -239,6 +249,7 @@
 //TODO: Implement me
 -(void)startRecordingLocationWithAccuracy:(Location)loc {
   [_locmgr startUpdatingLocation];
+  [_locmgr startUpdatingHeading];
   [self startRecordingIMUData];
   [self startRecordingDeviceMotionData];
   [self startPedometer];
@@ -246,9 +257,10 @@
 
 -(void)stopRecordingLocationWithAccuracy {
   [_locmgr stopUpdatingLocation];
+  [_locmgr stopUpdatingHeading];
   [self stopRecordingIMUData];
+  [self stopRecordingDeviceMotionData];
   [self stopPedometer];
-  
 }
 
 
@@ -496,7 +508,9 @@
   }
 }
 
-
+-(void)locationManager:(CLLocationManager *)manager didUpdateHeading:(CLHeading *)newHeading{
+  [self logLine:[NSString stringWithFormat:@"%@,%f\n",[NSDate date],newHeading.magneticHeading] ToDataFile:headingDATA_FILE_NAME];
+}
 
 #pragma mark - MFMailComposeViewControllerDelegate Methods -
 
