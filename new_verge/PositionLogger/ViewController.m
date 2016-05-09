@@ -134,8 +134,8 @@
   }
   
   _heading = [self openFileForWriting:devmotDATA_FILE_NAME];
-  if (!_devmot) {
-    NSAssert(_devmot, @"Couldn't open file for writing.");
+  if (!_heading) {
+    NSAssert(_heading, @"Couldn't open file for writing.");
   }
   
 }
