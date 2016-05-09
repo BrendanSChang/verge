@@ -444,6 +444,7 @@
   [self addAttachment:accDATA_FILE_NAME To:mc];
   [self addAttachment:pedDATA_FILE_NAME To:mc];
   [self addAttachment:devmotDATA_FILE_NAME To:mc];
+  [self addAttachment:headingDATA_FILE_NAME To:mc];
 
   // Present mail view controller on screen
   [self presentViewController:mc animated:YES completion:NULL];
