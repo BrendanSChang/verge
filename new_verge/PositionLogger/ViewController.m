@@ -133,7 +133,7 @@
     NSAssert(_devmot, @"Couldn't open file for writing.");
   }
   
-  _heading = [self openFileForWriting:devmotDATA_FILE_NAME];
+  _heading = [self openFileForWriting:headingDATA_FILE_NAME];
   if (!_heading) {
     NSAssert(_heading, @"Couldn't open file for writing.");
   }
