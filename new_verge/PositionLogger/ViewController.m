@@ -147,7 +147,7 @@
   [self logLine:@"Time,X,Y,Z\n" ToDataFile:accDATA_FILE_NAME]; //TODO: write file header for accelerometer data
   [self logLine:@"Time,Distance\n" ToDataFile:pedDATA_FILE_NAME];
   [self logLine:@"Time,Heading\n" ToDataFile:devmotDATA_FILE_NAME];
-  [self logLine:@"Time,Heading\n" ToDataFile:headingDATA_FILE_NAME];
+  [self logLine:@"TimeStamp,HumanReadableTime,Heading\n" ToDataFile:headingDATA_FILE_NAME];
 }
 
 -(void) closeAllFiles{
@@ -509,7 +509,7 @@
 }
 
 -(void)locationManager:(CLLocationManager *)manager didUpdateHeading:(CLHeading *)newHeading{
-  [self logLine:[NSString stringWithFormat:@"%@,%f\n",[NSDate date],newHeading.magneticHeading] ToDataFile:headingDATA_FILE_NAME];
+  [self logLine:[NSString stringWithFormat:@"%@,%@,%f\n",newHeading.timestamp,[NSDate date],newHeading.magneticHeading] ToDataFile:headingDATA_FILE_NAME];
 }
 
 #pragma mark - MFMailComposeViewControllerDelegate Methods -
