@@ -13,12 +13,16 @@
 #define gyroDATA_FILE_NAME @"gyroscopeData.csv"
 #define accDATA_FILE_NAME @"accelerometerData.csv"
 #define pedDATA_FILE_NAME @"pedometerData.csv"
-#define devmotDATA_FILE_NAME @"devicemotionData.csv"
 #define headingDATA_FILE_NAME @"headingData.csv"
 
 //TODO: These need to be tuned.
 #define EWMA_WEIGHT .75
 #define INTERVAL 1
+#define THRESHOLD_DISTANCE 15
+#define STATE_COUNT 3
+
+// Estimate of one degree of latitude in meters.
+#define LAT_ONE_DEGREE_M 111111
 
 #define degToRad(x) (M_PI * (x) / 180.0)
 #define radToDeg(x) ((x) * 180.0 / M_PI)
@@ -33,35 +37,36 @@
   BOOL _isRecording;
   NSFileHandle *_f,*_mag,*_gyro,*_acc,*_ped,*_devmot,*_heading;
   UIAlertController *_alert;
-  
+
   CLLocation *targetLoc;
-  CLLocation *startLoc;
-  //CLLocation *prevLoc;
+  CLLocation *curLoc;
 
   double prevSpeed;
-  double eta;
-  double thresholdDistance;
   double prevDist;
+  double head;
+  double eta;
+  int count;
+  bool outside;
 }
 
 - (void)viewDidLoad {
-  
+
   [super viewDidLoad];
-  
+
   self.mapView.delegate = self;
   self.mapView.showsUserLocation = YES;
   NSLog(@"Content scale factor is %f",self.mapView.contentScaleFactor);
-  
+
   [self.mapView setUserTrackingMode:MKUserTrackingModeFollow];
-  
-  startLoc = NULL;
-  //prevLoc = NULL;
+
+  curLoc = NULL;
 
   prevSpeed = 0;
-  eta = INFINITY;
-  thresholdDistance = 30; //Distance in meters to discern arrival.
-                          //TODO: Needs to be tuned.
   prevDist = 0; //Only used for indoor localization with pedometer.
+  head = 0;
+  eta = INFINITY;
+  count = 0; // Counter for determining outdoor/indoor state change.
+  outside = TRUE; // Assume that we start outdoors.
 
   [_accuracyControl addTarget:self
                        action:@selector(action:)
@@ -81,8 +86,7 @@
   _motmgr.accelerometerUpdateInterval = INTERVAL;
   _motmgr.gyroUpdateInterval = INTERVAL;
   _motmgr.magnetometerUpdateInterval = INTERVAL;
-  _motmgr.deviceMotionUpdateInterval = INTERVAL;
-  
+
   //pedometer setup
   _pedometer = [[CMPedometer alloc] init];
   
@@ -92,10 +96,10 @@
   self.recordingIndicator.hidesWhenStopped = TRUE;
   self.startStopButton.layer.borderWidth = 1.0;
   self.startStopButton.layer.cornerRadius = 5.0;
-  
+
   [self initializeAllFileHandles];
   [self writeFileHeaders];
-  
+
 
   // Do any additional setup after loading the view, typically from a nib.
 }
@@ -128,11 +132,6 @@
     NSAssert(_ped, @"Couldn't open file for writing.");
   }
   
-  _devmot = [self openFileForWriting:devmotDATA_FILE_NAME];
-  if (!_devmot) {
-    NSAssert(_devmot, @"Couldn't open file for writing.");
-  }
-  
   _heading = [self openFileForWriting:headingDATA_FILE_NAME];
   if (!_heading) {
     NSAssert(_heading, @"Couldn't open file for writing.");
@@ -141,13 +140,14 @@
 }
 
 -(void) writeFileHeaders{
-  [self logLine:@"Time,Lat,Lon,Altitude,Accuracy,Heading,Speed,ETA\n" ToDataFile:kDATA_FILE_NAME];
-  [self logLine:@"Time,X,Y,Z\n" ToDataFile:magDATA_FILE_NAME]; //TODO: write file header for magnometer data
-  [self logLine:@"Time,X,Y,Z\n" ToDataFile:gyroDATA_FILE_NAME]; //TODO: write file header for gyroscope data
-  [self logLine:@"Time,X,Y,Z\n" ToDataFile:accDATA_FILE_NAME]; //TODO: write file header for accelerometer data
+  [self logLine:@"Time,Lat,Lon,Altitude,Accuracy,Heading,Speed,ETA,Type\n"
+     ToDataFile:kDATA_FILE_NAME];
+  [self logLine:@"Time,X,Y,Z\n" ToDataFile:magDATA_FILE_NAME];
+  [self logLine:@"Time,X,Y,Z\n" ToDataFile:gyroDATA_FILE_NAME];
+  [self logLine:@"Time,X,Y,Z\n" ToDataFile:accDATA_FILE_NAME];
   [self logLine:@"Time,Distance\n" ToDataFile:pedDATA_FILE_NAME];
-  [self logLine:@"Time,Heading\n" ToDataFile:devmotDATA_FILE_NAME];
-  [self logLine:@"TimeStamp,HumanReadableTime,Heading\n" ToDataFile:headingDATA_FILE_NAME];
+  [self logLine:@"TimeStamp,Heading,Accuracy\n"
+     ToDataFile:headingDATA_FILE_NAME];
 }
 
 -(void) closeAllFiles{
@@ -156,7 +156,6 @@
   [_gyro closeFile];
   [_mag closeFile];
   [_ped closeFile];
-  [_devmot closeFile];
   [_heading closeFile];
 }
 
@@ -175,7 +174,8 @@
   [fileManager createFileAtPath:[self getPathToLogFile:fileName]
                        contents:nil
                      attributes:nil];
-  f = [NSFileHandle fileHandleForWritingAtPath:[self getPathToLogFile:fileName]];
+  f = [NSFileHandle fileHandleForWritingAtPath:
+                        [self getPathToLogFile:fileName]];
   return f;
 }
 
@@ -229,8 +229,6 @@
     return _acc;
   } else if ([fileName isEqual: pedDATA_FILE_NAME]){
     return _ped;
-  } else if ([fileName isEqual: devmotDATA_FILE_NAME]){
-    return _devmot;
   } else if ([fileName isEqual: headingDATA_FILE_NAME]){
     return _heading;
   } else {
@@ -251,7 +249,6 @@
   [_locmgr startUpdatingLocation];
   [_locmgr startUpdatingHeading];
   [self startRecordingIMUData];
-  [self startRecordingDeviceMotionData];
   [self startPedometer];
 }
 
@@ -259,7 +256,6 @@
   [_locmgr stopUpdatingLocation];
   [_locmgr stopUpdatingHeading];
   [self stopRecordingIMUData];
-  [self stopRecordingDeviceMotionData];
   [self stopPedometer];
 }
 
@@ -329,16 +325,80 @@
       startPedometerUpdatesFromDate:[NSDate date]
       withHandler:^(CMPedometerData *data, NSError *error) {
         if (error) {
-          NSLog(@"Pedometer error");
+          NSLog(@"Pedometer error: %@", [error localizedDescription]);
         } else {
-          double curDist = [data.distance doubleValue];
-          double delta = curDist - prevDist;
-          prevDist = curDist;
-          NSString *line = [NSString stringWithFormat:@"%@,%f\n",
-                            [NSDate date],
-                            delta
-                            ];
-          [self logLine:line ToDataFile:pedDATA_FILE_NAME];
+          if ([CMPedometer isDistanceAvailable]) {
+            double curDist = [data.distance doubleValue];
+            double delta = curDist - prevDist;
+            prevDist = curDist;
+
+            // Only estimate user's location if GPS is unavailable and there is
+            // a well-defined previous location.
+            if (!outside && curLoc != NULL) {
+              double latDisp = (delta*cos(head))/LAT_ONE_DEGREE_M;
+              double longDisp =
+                         (delta*sin(head))/
+                         (LAT_ONE_DEGREE_M*cos(curLoc.coordinate.longitude));
+
+              NSDate *d = [NSDate date];
+              double timeDiff = [d timeIntervalSinceDate:curLoc.timestamp];
+              curLoc = [[CLLocation alloc] initWithCoordinate:
+                                               CLLocationCoordinate2DMake(
+                                                   curLoc.coordinate.latitude +
+                                                       latDisp,
+                                                   curLoc.coordinate.longitude +
+                                                       longDisp
+                                               )
+                                                     altitude:curLoc.altitude
+                                           horizontalAccuracy:
+                                               curLoc.horizontalAccuracy
+                                             verticalAccuracy:
+                                                 curLoc.verticalAccuracy
+                                                       course:head
+                                                        speed:delta/timeDiff
+                                                    timestamp:[NSDate date]
+                       ];
+              
+              if ([self arrivedAtDestination:curLoc]) {
+                [self stopRecordingLocationWithAccuracy];
+                _distanceToLabel.text = @"Distance: You've arrived";
+                _ETALabel.text = @"ETA: You've arrived";
+                [self hitRecordStopButton:_startStopButton];
+              } else {
+                [self calculateEstimate:curLoc];
+
+                _distanceToLabel.text =
+                    [NSString stringWithFormat:
+                                  @"Distance: %f",
+                                  [self distanceBetween:targetLoc and:curLoc]];
+                _speedLabel.text =
+                    [NSString stringWithFormat:@"Speed: %f", curLoc.speed];
+                _ETALabel.text = [NSString stringWithFormat:@"ETA: %f", eta];
+
+                [self logLine:
+                  [NSString stringWithFormat:
+                                @"%@,%f,%f,%f,%f,%f,%f,%f,%@\n",
+                                curLoc.timestamp,
+                                curLoc.coordinate.latitude,
+                                curLoc.coordinate.longitude,
+                                curLoc.altitude,
+                                curLoc.horizontalAccuracy,
+                                curLoc.course,
+                                curLoc.speed,
+                                eta,
+                                @"Est"
+                  ]
+                  ToDataFile:kDATA_FILE_NAME
+                ];
+              }
+            }
+
+            NSString *line = [NSString stringWithFormat:@"%@,%f\n",
+                                                        [NSDate date],
+                                                        delta
+                             ];
+            [self logLine:line ToDataFile:pedDATA_FILE_NAME];
+          }
         }
       }
   ];
@@ -348,40 +408,8 @@
   [_pedometer stopPedometerUpdates];
 }
 
--(void)startRecordingDeviceMotionData {
-  //TODO: Check if reference frames are available.
-  //TODO: This uses magnetic north because we're assuming that we're indoors and
-  //      can't get accurate GPS readings. Should probably do something about
-  //      magnetic declination.
-  [_motmgr
-      startDeviceMotionUpdatesUsingReferenceFrame:
-          CMAttitudeReferenceFrameXMagneticNorthZVertical
-      toQueue:[[NSOperationQueue alloc] init]
-      withHandler:^(CMDeviceMotion *data, NSError *error) {
-        CMRotationMatrix rotation = data.attitude.rotationMatrix;
-        double heading = radToDeg(M_PI + atan2(rotation.m22, rotation.m12));
-        
-        NSString *line = [NSString stringWithFormat:@"%@,%f\n",
-                          [NSDate date],
-                          heading
-                          ];
-        [self logLine:line ToDataFile:devmotDATA_FILE_NAME];
-        
-        /*
-        dispatch_async(dispatch_get_main_queue(), ^{
-          // Do any UI updates in here.
-        });
-        */
-      }
-  ];
-}
-
--(void)stopRecordingDeviceMotionData {
-  [_motmgr stopDeviceMotionUpdates];
-}
-
 -(IBAction)hitRecordStopButton:(UIButton *)b {
-  startLoc = NULL;
+  curLoc = NULL;
   if (!_isRecording) {
     [self.accuracyControl setEnabled:FALSE];
     [b setTitle:@"Stop" forState:UIControlStateNormal];
@@ -443,74 +471,97 @@
   [self addAttachment:gyroDATA_FILE_NAME To:mc];
   [self addAttachment:accDATA_FILE_NAME To:mc];
   [self addAttachment:pedDATA_FILE_NAME To:mc];
-  [self addAttachment:devmotDATA_FILE_NAME To:mc];
   [self addAttachment:headingDATA_FILE_NAME To:mc];
 
   // Present mail view controller on screen
   [self presentViewController:mc animated:YES completion:NULL];
 }
 
--(void) addAttachment:(NSString *)fileName To:(MFMailComposeViewController *)mc{
-  
+-(void) addAttachment:(NSString *)fileName
+                   To:(MFMailComposeViewController *)mc {
   //Get contents of file
-  NSData *fileData = [NSData dataWithContentsOfFile:[self getPathToLogFile:fileName]];
+  NSData *fileData = [NSData dataWithContentsOfFile:
+                                 [self getPathToLogFile:fileName]];
   if (!fileData || [fileData length] == 0) {
     NSLog(@"THE DATA FILE IS EMPTY");
     return;
   }
-  
+
   // Determine the MIME type
   NSString *mimeType = @"text/plain";
-  
+
   // Add attachment
   [mc addAttachmentData:fileData mimeType:mimeType fileName:fileName];
-  
 }
 
 #pragma mark - CLLocationManagerDelegate Methods -
 
 - (void)locationManager:(CLLocationManager *)manager
      didUpdateLocations:(NSArray<CLLocation *> *)locations {
-  //TODO: Prune readings based on accuracy?
-  for (CLLocation *location in locations) {
+  // Use the most recent accurate update.
+  for (CLLocation *location in [locations reverseObjectEnumerator]) {
+    if (location.horizontalAccuracy <= THRESHOLD_DISTANCE) {
+      [self updateState:Outdoors];
 
-    //If path hasn't been started, use the first location found.
-    if (startLoc == NULL){
-      startLoc = location;
-    }
-    
-    if ([self arrivedAtDestination:location]) {
-      [self stopRecordingLocationWithAccuracy];
-      _distanceToLabel.text = @"Distance: You've arrived";
-      _ETALabel.text = @"ETA: You've arrived";
-      [self hitRecordStopButton:_startStopButton];
-    } else {
-    
-      [self calculateEstimate:location];
+      if (outside) {
+        curLoc = location;
 
-  //    NSLog(@"Updating location");
-      _distanceToLabel.text = [NSString stringWithFormat: @"Distance: %f",
-                                  [self distanceBetween:targetLoc and:location]];
-      _speedLabel.text = [NSString stringWithFormat:@"Speed: %f", location.speed];
-      _ETALabel.text = [NSString stringWithFormat:@"ETA: %f", eta];
-      [self logLine:
-          [NSString stringWithFormat:@"%f,%f,%f,%f,%f,%f,%f,%f\n",
-              [location.timestamp timeIntervalSince1970],
-              location.coordinate.latitude,
-              location.coordinate.longitude,
-              location.altitude,
-              location.horizontalAccuracy,
-              location.course,
-              location.speed,
-              eta
-          ] ToDataFile:kDATA_FILE_NAME
-      ];
+        if ([self arrivedAtDestination:location]) {
+          [self stopRecordingLocationWithAccuracy];
+          _distanceToLabel.text = @"Distance: You've arrived";
+          _ETALabel.text = @"ETA: You've arrived";
+          [self hitRecordStopButton:_startStopButton];
+        } else {
+          [self calculateEstimate:location];
+
+          _distanceToLabel.text =
+              [NSString stringWithFormat:
+                            @"Distance: %f",
+                            [self distanceBetween:targetLoc and:location]];
+          _speedLabel.text =
+              [NSString stringWithFormat:@"Speed: %f", location.speed];
+          _ETALabel.text = [NSString stringWithFormat:@"ETA: %f", eta];
+
+          [self logLine:
+                    [NSString stringWithFormat:
+                                 @"%@,%f,%f,%f,%f,%f,%f,%f,%@\n",
+                                 location.timestamp,
+                                 location.coordinate.latitude,
+                                 location.coordinate.longitude,
+                                 location.altitude,
+                                 location.horizontalAccuracy,
+                                 location.course,
+                                 location.speed,
+                                 eta,
+                                 @"GPS"
+                    ]
+             ToDataFile:kDATA_FILE_NAME
+          ];
+        }
+      }
+
+      return;
     }
   }
+
+  [self updateState:Indoors];
 }
 
--(void)locationManager:(CLLocationManager *)manager didUpdateHeading:(CLHeading *)newHeading{
-  [self logLine:[NSString stringWithFormat:@"%@,%@,%f\n",newHeading.timestamp,[NSDate date],newHeading.magneticHeading] ToDataFile:headingDATA_FILE_NAME];
+-(void)locationManager:(CLLocationManager *)manager
+      didUpdateHeading:(CLHeading *)newHeading {
+  if (newHeading.headingAccuracy >= 0) {
+    head = newHeading.magneticHeading;
+  }
+
+  [self logLine:
+            [NSString stringWithFormat:
+                          @"%@,%f,%f\n",
+                          newHeading.timestamp,
+                          newHeading.magneticHeading,
+                          newHeading.headingAccuracy
+            ]
+     ToDataFile:headingDATA_FILE_NAME
+  ];
 }
 
 #pragma mark - MFMailComposeViewControllerDelegate Methods -
@@ -543,9 +594,26 @@
 
 # pragma mark - Helper Functions -
 
+// STATE_COUNT is the threshold used to determine the number of updates with
+// good/bad accuracy necessary to change the user's state from outdoors to
+// indoors or vice versa.
+-(void) updateState:(State)move {
+  if ((outside && move == Indoors) || (!outside && move == Outdoors)) {
+    count++;
+  } else {
+    count = 0;
+  }
+
+  if (count == STATE_COUNT) {
+    outside = !outside;
+    count = 0;
+  }
+}
+
 -(bool) arrivedAtDestination:(CLLocation *)currentLocation {
     return [self distanceBetween:currentLocation
-                           and:targetLoc] < thresholdDistance;
+                             and:targetLoc]
+                                                  < THRESHOLD_DISTANCE;
 }
 
 -(double)distanceBetween:(CLLocation *)loc1 and:(CLLocation *)loc2 {
@@ -582,7 +650,7 @@
   return radToDeg(angleRadians);
 }
 
-//TODO: Make more robust by EWMA'ing angle? Or averaging over previous velocities?
+//TODO: Make more robust by EWMA'ing angle/averaging over previous velocities?
 -(void) calculateEstimate:(CLLocation *)location {
   if (location.speed != -1 && location.course >= 0) {
     // Generate destination vector.

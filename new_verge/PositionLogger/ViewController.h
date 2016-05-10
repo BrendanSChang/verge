@@ -19,6 +19,11 @@ typedef enum {
     Loc4 = 3
 } Location;
 
+typedef enum {
+    Indoors = 0,
+    Outdoors = 1
+} State;
+
 @interface ViewController : UIViewController<MFMailComposeViewControllerDelegate,CLLocationManagerDelegate,MKMapViewDelegate>
 
 @property IBOutlet UISegmentedControl *accuracyControl;
