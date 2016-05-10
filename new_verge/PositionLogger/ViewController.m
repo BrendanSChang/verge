@@ -67,6 +67,7 @@
   eta = INFINITY;
   count = 0; // Counter for determining outdoor/indoor state change.
   outside = TRUE; // Assume that we start outdoors.
+  _timeLabel.text = [NSString stringWithFormat:@"Outside: %@",(outside ? @"True":@"False")];
 
   [_accuracyControl addTarget:self
                        action:@selector(action:)
@@ -140,7 +141,7 @@
 }
 
 -(void) writeFileHeaders{
-  [self logLine:@"Time,Lat,Lon,Altitude,Accuracy,Heading,Speed,ETA,Type\n"
+  [self logLine:@"Time,Lat,Lon,Altitude,Accuracy,Heading,Speed,ETA,Type,Outside\n"
      ToDataFile:kDATA_FILE_NAME];
   [self logLine:@"Time,X,Y,Z\n" ToDataFile:magDATA_FILE_NAME];
   [self logLine:@"Time,X,Y,Z\n" ToDataFile:gyroDATA_FILE_NAME];
@@ -330,6 +331,7 @@
           if ([CMPedometer isDistanceAvailable]) {
             double curDist = [data.distance doubleValue];
             double delta = curDist - prevDist;
+            double speed = 1 / [data.currentPace doubleValue];
             prevDist = curDist;
 
             // Only estimate user's location if GPS is unavailable and there is
@@ -340,8 +342,6 @@
                          (delta*sin(head))/
                          (LAT_ONE_DEGREE_M*cos(curLoc.coordinate.longitude));
 
-              NSDate *d = [NSDate date];
-              double timeDiff = [d timeIntervalSinceDate:curLoc.timestamp];
               curLoc = [[CLLocation alloc] initWithCoordinate:
                                                CLLocationCoordinate2DMake(
                                                    curLoc.coordinate.latitude +
@@ -355,7 +355,7 @@
                                              verticalAccuracy:
                                                  curLoc.verticalAccuracy
                                                        course:head
-                                                        speed:delta/timeDiff
+                                                        speed:speed
                                                     timestamp:[NSDate date]
                        ];
               
@@ -377,7 +377,7 @@
 
                 [self logLine:
                   [NSString stringWithFormat:
-                                @"%@,%f,%f,%f,%f,%f,%f,%f,%@\n",
+                                @"%@,%f,%f,%f,%f,%f,%f,%f,%@,%i\n",
                                 curLoc.timestamp,
                                 curLoc.coordinate.latitude,
                                 curLoc.coordinate.longitude,
@@ -386,7 +386,8 @@
                                 curLoc.course,
                                 curLoc.speed,
                                 eta,
-                                @"Est"
+                                @"Est",
+                                outside
                   ]
                   ToDataFile:kDATA_FILE_NAME
                 ];
@@ -524,7 +525,7 @@
 
           [self logLine:
                     [NSString stringWithFormat:
-                                 @"%@,%f,%f,%f,%f,%f,%f,%f,%@\n",
+                                 @"%@,%f,%f,%f,%f,%f,%f,%f,%@,%i\n",
                                  location.timestamp,
                                  location.coordinate.latitude,
                                  location.coordinate.longitude,
@@ -533,7 +534,8 @@
                                  location.course,
                                  location.speed,
                                  eta,
-                                 @"GPS"
+                                 @"GPS",
+                                 outside
                     ]
              ToDataFile:kDATA_FILE_NAME
           ];
@@ -605,6 +607,7 @@
   }
 
   if (count == STATE_COUNT) {
+    _timeLabel.text = [NSString stringWithFormat:@"Outside: %@",(outside ? @"True":@"False")];
     outside = !outside;
     count = 0;
   }
