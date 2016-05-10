@@ -16,10 +16,11 @@
 #define headingDATA_FILE_NAME @"headingData.csv"
 
 //TODO: These need to be tuned.
-#define EWMA_WEIGHT .75
+#define EWMA_WEIGHT .5
 #define INTERVAL 1
-#define THRESHOLD_DISTANCE 15
-#define STATE_COUNT 3
+#define ACCURACY_THRESHOLD 15
+#define STATE_COUNT 5
+#define HEADING_THRESHOLD 5
 
 // Estimate of one degree of latitude in meters.
 #define LAT_ONE_DEGREE_M 111111
@@ -44,6 +45,7 @@
   double prevSpeed;
   double prevDist;
   double head;
+  double prevHead;
   double eta;
   int count;
   bool outside;
@@ -62,8 +64,12 @@
   curLoc = NULL;
 
   prevSpeed = 0;
-  prevDist = 0; //Only used for indoor localization with pedometer.
+
+  //These are only used for indoor localization with pedometer.
+  prevDist = 0;
   head = 0;
+  prevHead = 0;
+
   eta = INFINITY;
   count = 0; // Counter for determining outdoor/indoor state change.
   outside = TRUE; // Assume that we start outdoors.
@@ -78,6 +84,7 @@
   [_locmgr requestAlwaysAuthorization];
   _locmgr.delegate = self;
   _locmgr.distanceFilter = kCLDistanceFilterNone;
+  _locmgr.headingFilter = HEADING_THRESHOLD;
   _locmgr.allowsBackgroundLocationUpdates = TRUE;
   [_locmgr disallowDeferredLocationUpdates];
   _locmgr.desiredAccuracy = kCLLocationAccuracyBest;
@@ -198,9 +205,9 @@
                                              longitude:-71.09051];
       break;
     case Loc4:
-      _targetAddressLabel.text = @"Destination: Baker";
-      targetLoc = [[CLLocation alloc] initWithLatitude:42.3569925
-                                             longitude:-71.0957];
+      _targetAddressLabel.text = @"Destination: Killian";
+      targetLoc = [[CLLocation alloc] initWithLatitude:42.35905
+                                             longitude:-71.09163];
       break;
     default:
       NSLog(@"Didn't recognize loc");
@@ -331,16 +338,16 @@
           if ([CMPedometer isDistanceAvailable]) {
             double curDist = [data.distance doubleValue];
             double delta = curDist - prevDist;
-            double speed = 1 / [data.currentPace doubleValue];
+            double speed = 1/[data.currentPace doubleValue];
             prevDist = curDist;
 
             // Only estimate user's location if GPS is unavailable and there is
             // a well-defined previous location.
             if (!outside && curLoc != NULL) {
-              double latDisp = (delta*cos(head))/LAT_ONE_DEGREE_M;
+              double latDisp = (delta*cos(degToRad(head)))/LAT_ONE_DEGREE_M;
               double longDisp =
-                         (delta*sin(head))/
-                         (LAT_ONE_DEGREE_M*cos(curLoc.coordinate.longitude));
+                         (delta*sin(degToRad(head)))/
+                         (LAT_ONE_DEGREE_M*cos(degToRad(curLoc.coordinate.longitude)));
 
               curLoc = [[CLLocation alloc] initWithCoordinate:
                                                CLLocationCoordinate2DMake(
@@ -501,7 +508,7 @@
      didUpdateLocations:(NSArray<CLLocation *> *)locations {
   // Use the most recent accurate update.
   for (CLLocation *location in [locations reverseObjectEnumerator]) {
-    if (location.horizontalAccuracy <= THRESHOLD_DISTANCE) {
+    if (location.horizontalAccuracy <= ACCURACY_THRESHOLD) {
       [self updateState:Outdoors];
 
       if (outside) {
@@ -551,8 +558,9 @@
 
 -(void)locationManager:(CLLocationManager *)manager
       didUpdateHeading:(CLHeading *)newHeading {
-  if (newHeading.headingAccuracy >= 0) {
-    head = newHeading.magneticHeading;
+  if (newHeading.headingAccuracy > 0) {
+    head = EWMA_WEIGHT*newHeading.magneticHeading + (1-EWMA_WEIGHT)*prevHead;
+    prevHead = head;
   }
 
   [self logLine:
@@ -607,8 +615,8 @@
   }
 
   if (count == STATE_COUNT) {
-    _timeLabel.text = [NSString stringWithFormat:@"Outside: %@",(outside ? @"True":@"False")];
     outside = !outside;
+    _timeLabel.text = [NSString stringWithFormat:@"Outside: %@",(outside ? @"True":@"False")];
     count = 0;
   }
 }
@@ -616,7 +624,7 @@
 -(bool) arrivedAtDestination:(CLLocation *)currentLocation {
     return [self distanceBetween:currentLocation
                              and:targetLoc]
-                                                  < THRESHOLD_DISTANCE;
+                                                  < ACCURACY_THRESHOLD;
 }
 
 -(double)distanceBetween:(CLLocation *)loc1 and:(CLLocation *)loc2 {
