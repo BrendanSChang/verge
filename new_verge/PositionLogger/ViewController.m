@@ -15,12 +15,15 @@
 #define pedDATA_FILE_NAME @"pedometerData.csv"
 #define headingDATA_FILE_NAME @"headingData.csv"
 
-//TODO: These need to be tuned.
+//TODO: These need to be tuned. Also should be changed to consts in the header.
 #define EWMA_WEIGHT .5
 #define INTERVAL 1
 #define ACCURACY_THRESHOLD 15
 #define STATE_COUNT 5
 #define HEADING_THRESHOLD 5
+#define OVERSHOOT_RATIO .7
+#define DECLINATION -14
+#define INTERFERENCE -16
 
 // Estimate of one degree of latitude in meters.
 #define LAT_ONE_DEGREE_M 111111
@@ -352,9 +355,9 @@
               curLoc = [[CLLocation alloc] initWithCoordinate:
                                                CLLocationCoordinate2DMake(
                                                    curLoc.coordinate.latitude +
-                                                       latDisp,
+                                                       OVERSHOOT_RATIO*latDisp,
                                                    curLoc.coordinate.longitude +
-                                                       longDisp
+                                                       OVERSHOOT_RATIO*longDisp
                                                )
                                                      altitude:curLoc.altitude
                                            horizontalAccuracy:
@@ -374,14 +377,6 @@
               } else {
                 [self calculateEstimate:curLoc];
 
-                _distanceToLabel.text =
-                    [NSString stringWithFormat:
-                                  @"Distance: %f",
-                                  [self distanceBetween:targetLoc and:curLoc]];
-                _speedLabel.text =
-                    [NSString stringWithFormat:@"Speed: %f", curLoc.speed];
-                _ETALabel.text = [NSString stringWithFormat:@"ETA: %f", eta];
-
                 [self logLine:
                   [NSString stringWithFormat:
                                 @"%@,%f,%f,%f,%f,%f,%f,%f,%@,%i\n",
@@ -398,6 +393,16 @@
                   ]
                   ToDataFile:kDATA_FILE_NAME
                 ];
+
+                dispatch_async(dispatch_get_main_queue(), ^{
+                  _distanceToLabel.text =
+                  [NSString stringWithFormat:
+                   @"Distance: %f",
+                   [self distanceBetween:targetLoc and:curLoc]];
+                  _speedLabel.text =
+                  [NSString stringWithFormat:@"Speed: %f", curLoc.speed];
+                  _ETALabel.text = [NSString stringWithFormat:@"ETA: %f", eta];
+                });
               }
             }
 
@@ -559,7 +564,7 @@
 -(void)locationManager:(CLLocationManager *)manager
       didUpdateHeading:(CLHeading *)newHeading {
   if (newHeading.headingAccuracy > 0) {
-    head = EWMA_WEIGHT*newHeading.magneticHeading + (1-EWMA_WEIGHT)*prevHead;
+    head = EWMA_WEIGHT*(newHeading.magneticHeading + DECLINATION + INTERFERENCE) + (1-EWMA_WEIGHT)*prevHead;
     prevHead = head;
   }
 
